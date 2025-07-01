@@ -20,9 +20,12 @@ while ($true) {
         Write-Host "`nFetching and analyzing the M3U8 manifest..." -ForegroundColor Yellow
 
         try {
-            # Download the M3U8 manifest content
-            # -UseBasicParsing is included for compatibility
-            $manifestContent = (Invoke-WebRequest -Uri $m3u8Url -UseBasicParsing).Content
+            # --- Download the M3U8 manifest content ---
+            # Using System.Net.WebClient for better reliability with raw text.
+            $webClient = New-Object System.Net.WebClient
+            # Set a common user agent to mimic a browser and avoid being blocked.
+            $webClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+            $manifestContent = $webClient.DownloadString($m3u8Url)
 
             # --- DRM Protection Check ---
             Write-Host "`n--- DRM Information ---" -ForegroundColor Cyan
@@ -54,7 +57,7 @@ while ($true) {
                         $streamUrlLine = ""
                         for ($j = $i + 1; $j -lt $lines.Length; $j++) {
                             if (-not [string]::IsNullOrWhiteSpace($lines[$j]) -and $lines[$j] -notlike '#EXT*') {
-                                $streamUrlLine = $lines[$j]
+                                $streamUrlLine = $lines[$j].Trim()
                                 break
                             }
                         }
@@ -84,20 +87,20 @@ while ($true) {
             else {
                 # This is likely a media playlist (contains media segments)
                 Write-Host "This appears to be a media playlist, not a master playlist." -ForegroundColor Yellow
-
+                
                 if($manifestContent -match '#EXT-X-TARGETDURATION:(\d+)') {
                     Write-Host "  ▶ Target Duration: $($matches[1])s"
                 }
                 if($manifestContent -match '#EXT-X-MEDIA-SEQUENCE:(\d+)') {
                     Write-Host "  ▶ Media Sequence: $($matches[1])"
                 }
-
+                
                 $segmentCount = ($manifestContent | Select-String -Pattern '#EXTINF' -AllMatches).Matches.Count
                 Write-Host "  ▶ Number of Segments: $segmentCount"
             }
         }
         catch {
-            # Catch errors from Invoke-WebRequest (e.g., invalid URL, no connection)
+            # Catch errors from the web request (e.g., invalid URL, no connection)
             Write-Host "`nError: Failed to download or process the manifest." -ForegroundColor Red
             Write-Host "Please check the URL and your internet connection." -ForegroundColor Red
             Write-Host "Details: $($_.Exception.Message)" -ForegroundColor Gray
@@ -105,7 +108,7 @@ while ($true) {
     }
 
     Write-Host "`n=======================================" -ForegroundColor Cyan
-
+    
     # Prompt to continue or exit
     $choice = Read-Host "Press Enter to check another link, or type 'e' to exit"
     if ($choice -eq 'e') {
