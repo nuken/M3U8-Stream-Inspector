@@ -2,6 +2,10 @@
 # This script prompts for an M3U8 URL, downloads the manifest,
 # and checks for DRM protection and stream variant information.
 
+# Set the output encoding to UTF-8 to correctly display special characters.
+# This helps, but console font/settings can still cause issues.
+$OutputEncoding = [System.Text.Encoding]::UTF8
+
 # --- Main Script Loop ---
 while ($true) {
     Clear-Host
@@ -30,12 +34,12 @@ while ($true) {
             # --- DRM Protection Check ---
             Write-Host "`n--- DRM Information ---" -ForegroundColor Cyan
             if ($manifestContent -match '#EXT-X-KEY') {
-                Write-Host "▶ DRM Protection: Yes" -ForegroundColor Red
+                Write-Host "> DRM Protection: Yes" -ForegroundColor Red
                 $drmInfo = $manifestContent | Select-String -Pattern '#EXT-X-KEY'
                 Write-Host "  Details: $($drmInfo.Line)"
             }
             else {
-                Write-Host "▶ DRM Protection: No" -ForegroundColor Green
+                Write-Host "> DRM Protection: No" -ForegroundColor Green
             }
             Write-Host
 
@@ -72,7 +76,7 @@ while ($true) {
                         if ($infoLine -match 'RESOLUTION=([\d]+x[\d]+)') { $resolution = $matches[1] }
                         if ($infoLine -match 'CODECS="([^"]+)"') { $codecs = $matches[1] }
 
-                        Write-Host "  ▶ Variant Stream:"
+                        Write-Host "  > Variant Stream:"
                         Write-Host "    - Bandwidth:  $($bandwidth) bps"
                         Write-Host "    - Resolution: $resolution"
                         Write-Host "    - Codecs:     $codecs"
@@ -89,14 +93,14 @@ while ($true) {
                 Write-Host "This appears to be a media playlist, not a master playlist." -ForegroundColor Yellow
                 
                 if($manifestContent -match '#EXT-X-TARGETDURATION:(\d+)') {
-                    Write-Host "  ▶ Target Duration: $($matches[1])s"
+                    Write-Host "  > Target Duration: $($matches[1])s"
                 }
                 if($manifestContent -match '#EXT-X-MEDIA-SEQUENCE:(\d+)') {
-                    Write-Host "  ▶ Media Sequence: $($matches[1])"
+                    Write-Host "  > Media Sequence: $($matches[1])"
                 }
                 
                 $segmentCount = ($manifestContent | Select-String -Pattern '#EXTINF' -AllMatches).Matches.Count
-                Write-Host "  ▶ Number of Segments: $segmentCount"
+                Write-Host "  > Number of Segments: $segmentCount"
             }
         }
         catch {
@@ -117,4 +121,4 @@ while ($true) {
 }
 
 Clear-Host
-Write-Host "Exiting script. Goodbye! 👋" -ForegroundColor Green
+Write-Host "Exiting script. Goodbye!" -ForegroundColor Green
