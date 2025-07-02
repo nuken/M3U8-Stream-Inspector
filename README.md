@@ -16,9 +16,11 @@ The scripts are available for both Linux/macOS (Bash) and Windows (PowerShell).
 
 ## Installation and Usage
 
-First, download the appropriate script for your operating system. You can do this by clicking the file in the GitHub repository and then clicking the "Raw" or "Download" button to save it.
+Choose the method that best fits your operating system and workflow.
 
-### For Linux and macOS (`inspect_m3u8.sh`)
+### Option 1: Native Installation (Recommended for Quick Use)
+
+#### For Linux and macOS (`inspect_m3u8.sh`)
 
 1.  **Download the Script**
     Save the `inspect_m3u8.sh` file to your computer.
@@ -42,9 +44,7 @@ First, download the appropriate script for your operating system. You can do thi
     ```
     The script will then prompt you to enter an M3U8 stream URL.
 
----
-
-### For Windows (`Inspect-M3U8.ps1`)
+#### For Windows (`Inspect-M3U8.ps1`)
 
 1.  **Download the Script**
     Save the `Inspect-M3U8.ps1` file to your computer.
@@ -70,6 +70,31 @@ First, download the appropriate script for your operating system. You can do thi
     .\Inspect-M3U8.ps1
     ```
     The script will then prompt you to enter an M3U8 stream URL.
+
+---
+
+### Option 2: Using Docker (Universal Method)
+
+This method allows you to run the `inspect_m3u8.sh` script on any system with Docker installed (Windows, macOS, or Linux), guaranteeing a consistent environment.
+
+1.  **Prerequisites**
+    -   Ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running on your system.
+
+2.  **Download the Files**
+    Download both the `inspect_m3u8.sh` and the `Dockerfile` from the repository. Make sure you place them in the same directory on your computer.
+
+3.  **Build the Docker Image**
+    Open a terminal or PowerShell window, navigate to the directory containing your `Dockerfile` and script, and run the build command. This creates a reusable image named `m3u8-inspector`. You only need to do this once.
+    ```bash
+    docker build -t m3u8-inspector .
+    ```
+
+4.  **Run the Script in a Container**
+    Now, any time you want to run the script, use the `docker run` command. The `-it` flag makes the session interactive, and `--rm` cleans up the container after you exit.
+    ```bash
+    docker run -it --rm m3u8-inspector
+    ```
+    The container will start, and you will be prompted to enter the M3U8 URL directly in your terminal. Remember, the `docker build` command is a one-time setup. You can use `docker run` to execute the script anytime without rebuilding.
 
 ## How It Works
 
